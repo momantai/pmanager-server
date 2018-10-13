@@ -1,29 +1,35 @@
 from app import app
-from app import mongo, socketio
+from app import socketio, m
 import json
 from bson.json_util import dumps
 from flask_socketio import send
+import uuid
+from flask import jsonify
 
-from models.modeldb import mongod
-
-m = mongod(mongo)
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    return render_template("test.html", db=dbb)
+    return '<h1>Page Index to Plam - Manager</h1>'
 
 
-@app.route('/json', methods=['GET'])
+@app.route('/json')
 def son():
-    return dumps(m.find_task(owner='momantai', id='5bbd24f8bc5fd60d3d436b22'))
+    return jsonify(m.find_task(owner='momantai', proyect='5bbd24f8bc5fd60d3d436b22'))
 
-@app.route('/plam')
-def lam():
-    return '<h1>Plam</h1>'
+@app.route('/newTask/<work>/<status>')
+def newTask(work, status):
+    _id = str(uuid.uuid4())
+    m.newTask(
+        work=work,
+        status=status,
+        _id=_id
+    )
+    
+    return jsonify({'_id': _id,'data':work, 'status': status})
+
 
 @socketio.on('message', namespace='/view')
 def headMessage(*msg):
-    m.change(typeAction=msg[0]['typeAction'],
+    m.change_status(typeAction=msg[0]['typeAction'],
              idI=msg[0]['idI'],
              statusI=msg[0]['statusI'],
              trayectI=msg[0]['trayectI'])
