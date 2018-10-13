@@ -1,0 +1,6 @@
+.vscode
+__pycache__
+lib
+bin
+./*/__pycache__
+pip-selfcheck.json
