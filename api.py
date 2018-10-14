@@ -35,6 +35,7 @@ class Task(Resource):
             
             data = dict(data)
             data['status'] = s
+
             socketio.emit('message', data, namespace = '/view')
 
             return jsonify({'message': 'Yeah!'})
@@ -47,8 +48,6 @@ class Task(Resource):
             proyect=proyect,
             task_id=data
         )
-
-        print(data)
 
         return jsonify({'message': 'Yeah!', '_id': data})
 
