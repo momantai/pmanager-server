@@ -5640,37 +5640,83 @@
 
 <body id="preview">
     <h2><a id="Bienvenido_a_la_API_PManager_0"></a>Bienvenido a la API PManager</h2>
-    <h4><a id="Metodos_para_task_1"></a>Metodos para <strong><em>task</em></strong></h4>
-    <blockquote>
-        <p>/api/&lt;owner&gt;/&lt;proyect&gt;/task</p>
-    </blockquote>
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Methods</th>
-                <th>Parametos esenciales</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>GET</td>
-                <td>Sin parametros para consultar datos.</td>
-            </tr>
-            <tr>
-                <td>POST</td>
-                <td>Parametros necesarios nuevo <em>task</em> <strong>_id, work, status</strong>.</td>
-            </tr>
-            <tr>
-                <td>PUT</td>
-                <td>Actualización <strong>_id, work, status, type</strong>.</td>
-            </tr>
-            <tr>
-                <td>DELETE</td>
-                <td>Eliminar <em>task</em>, parametros <strong>_id</strong>.</td>
-            </tr>
-        </tbody>
-        
-    </table>
+<h4><a id="Metodos_para_task_1"></a>Metodos para <strong><em>task</em></strong></h4>
+<blockquote>
+<p>/api/&lt;owner&gt;/&lt;proyect&gt;/task</p>
+</blockquote>
+<p>Todos las respuestas son recibidas en formato JSON.</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Methods</th>
+<th>Parametos esenciales</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>Sin parametros para consultar todos los datos de <em>task</em>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>Parametros necesarios un nuevo <em>task</em> <strong>_id, work, status</strong>.</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>Actualización de un task <strong>_id, status, typeAction, move</strong>.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>Eliminar <em>task</em>, parametros <strong>_id</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p>Descripción de parametros a enviar a travez de los metodos disponibles para <em>task</em>.</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Parametros enviados</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_id</td>
+<td>Identificador de un <em>task</em> nuevo o existente.</td>
+</tr>
+<tr>
+<td>work</td>
+<td>Cuerpo de un <em>task</em>.</td>
+</tr>
+<tr>
+<td>status</td>
+<td>Estado actual de un <em>task</em>.</td>
+</tr>
+<tr>
+<td>typeAction</td>
+<td>Tipo de acción a realizar. Ej: changeStatus.</td>
+</tr>
+<tr>
+<td>move</td>
+<td>Mover <em>task</em>. Ej: n (siguiente, next).</td>
+</tr>
+</tbody>
+</table>
+<p>Respuestas de algunos metodos utilizados.</p>
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th>Methods</th>
+<th>Respuesta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><strong><em>task</em></strong> (Global) <strong>_id, work, status</strong>.</td>
+</tr>
+</tbody>
+</table>
 
 </body>
 
