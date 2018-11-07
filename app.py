@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# app.py
+
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
@@ -30,4 +33,5 @@ from views import *
 from api import *
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0")
+    app.run()
+    #socketio.run(app, host="0.0.0.0")
