@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_pymongo import PyMongo
 from flask_restful import Api
 from models.modeldb import mongod
-
+import os
 
 class CustomFlask(Flask):
     jinja_options = Flask.jinja_options.copy()
@@ -32,6 +32,8 @@ m = mongod(mongo)
 from views import *
 from api import *
 
+port = int(os.getenv('PORT', 5000))
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=port)
     #socketio.run(app, host="0.0.0.0")
