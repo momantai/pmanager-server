@@ -1,3 +1,13 @@
 ---
 applications:
-- command: python app.py
+- instances: 1
+  timeout: 180
+  name: pmanagerd
+  buildpack: python_buildpack
+  command: python app.py start 0.0.0.0:$PORT
+  memory: 128MB
+  domain: mybluemix.net
+  host: pmanagerd
+  env:
+    FLASK_APP : server
+    FLASK_DEBUG : false
