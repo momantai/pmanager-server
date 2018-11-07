@@ -16,7 +16,8 @@ class mongod:
             'task': 1,
             'task.work': 1,
             'task.status': 1,
-            'task._id': 1
+            'task._id': 1,
+            'task.tag': 1
         })
     def new_task(self, **data):
         self.mong.db.proyects.update_one({
@@ -27,7 +28,8 @@ class mongod:
                 'task': {
                     '_id': data['_id'],
                     'work': data['work'],
-                    'status': data['status']
+                    'status': data['status'],
+                    'tag': data['tag']
                 }
             }
         })
@@ -50,6 +52,18 @@ class mongod:
                 }
             }, upsert=False)
         return status
+    def edit_task(self, **data):
+        self.mong.db.proyects.update(
+            {
+                'owner': 'momantai',
+                'proyect_id': data['proyect'],
+                'task._id': data['_id']
+            }, {
+                '$set' : {
+                    'task.$.work': data['work']
+                }
+            }
+        )
 
     def delete_task(self, **data):
         self.mong.db.proyects.update(

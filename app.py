@@ -18,10 +18,15 @@ api = Api(app)
 mongo = PyMongo(app)
 socketio = SocketIO(app)
 
+@socketio.on('message', namespace='/view')
+def mensaje(msg):
+    print(msg)
+
+
 m = mongod(mongo)
 
 from views import *
 from api import *
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, host="0.0.0.0")
