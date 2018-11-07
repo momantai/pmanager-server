@@ -1,5 +1,3 @@
 ---
 applications:
-- name: pmanager-server
-  memory: 128M
-  command: python app.py
+- command: python app.py
