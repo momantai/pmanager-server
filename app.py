@@ -19,7 +19,8 @@ mongo = PyMongo(app)
 socketio = SocketIO(app)
 
 @socketio.on('message', namespace='/view')
-def mensaje(msg):
+def mensaje(*msg):
+    print("Hola mundo")
     print(msg)
 
 
