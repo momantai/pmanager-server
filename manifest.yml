@@ -1,0 +1,6 @@
+---
+applications:
+- name: pmanager-server
+  memory: 128M
+  command: python app.py
+  buildpack: https://github.com/momantai/pmanager-server.git
