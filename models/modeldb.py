@@ -48,7 +48,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.$.status': status
+                    'task.status': status
                 }
             }, upsert=False)
         return status
@@ -60,7 +60,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set' : {
-                    'task.$.work': data['work']
+                    'task.work': data['work']
                 }
             }
         )

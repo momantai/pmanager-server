@@ -21,12 +21,6 @@ api = Api(app)
 mongo = PyMongo(app)
 socketio = SocketIO(app)
 
-@socketio.on('message', namespace='/view')
-def mensaje(*msg):
-    print("Hola mundo")
-    print(msg)
-
-
 m = mongod(mongo)
 
 from views import *
@@ -35,5 +29,6 @@ from api import *
 port = int(os.getenv('PORT', 5000))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port)
+    socketio.run(app)
+    #app.run(host='0.0.0.0', port=port)
     #socketio.run(app, host="0.0.0.0")
