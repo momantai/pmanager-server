@@ -20,6 +20,8 @@ CORS(app)
 api = Api(app)
 mongo = PyMongo(app)
 socketio = SocketIO(app)
+socketio = SocketIO(async_mode='gevent')
+
 
 m = mongod(mongo)
 
@@ -29,6 +31,5 @@ from api import *
 port = int(os.getenv('PORT', 5000))
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0')
-    #app.run(host='0.0.0.0', port=port)
-    #socketio.run(app, host="0.0.0.0")
+    app.run(host='0.0.0.0', port=port)
+    #socketio.run(app, port=5000)
