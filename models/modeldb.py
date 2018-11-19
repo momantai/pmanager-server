@@ -42,7 +42,7 @@ class mongod:
             'task._id': data['_id']
         }, {
             '$push': {
-                'task.$.resources': {
+                'task.resources': {
                     '_id': data['_idf'],
                     'name': data['name']
                 }
@@ -63,7 +63,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.$.status': status
+                    'task.status': status
                 }
             }, upsert=False)
         return status
@@ -111,7 +111,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.$.work': data['newTitle']
+                    'task.work': data['newTitle']
                 }
             }, upsert=False)
     def update_task_description(self, **data):
@@ -122,6 +122,6 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.$.description': data['newDescription']
+                    'task.description': data['newDescription']
                 }
             }, upsert=False)
