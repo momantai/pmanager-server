@@ -26,6 +26,10 @@ m = mongod(mongo)
 from views import *
 from api import *
 
+@socketio.on('message', namespace='/view')
+def datas(*msg):
+    print(msg)
+
 #port = int(os.getenv('PORT', 5000))
 port = os.environ.get("PORT") or os.environ.get("VCAP_APP_PORT") or 5000
 if __name__ == '__main__':

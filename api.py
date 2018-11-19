@@ -1,7 +1,12 @@
 from app import app, m, api, socketio
 from flask import jsonify, request, render_template
 from flask_restful import Resource
+from uuid import uuid4
+from flask_uploads import UploadSet, configure_uploads, uploaded_file, ALL
 
+
+file = UploadSet('files', ALL)
+configure_uploads(app, file)
 
 class Task(Resource):
     def get(self, owner, proyect):
@@ -10,20 +15,29 @@ class Task(Resource):
     def post(self, owner, proyect):
         data = request.form
         print(data)
-         
+
+        id = str(uuid4())
+
+        tgs = data['tags'].split(',')
+        if tgs == ['']:
+            tgs = ''
+        print(tgs)
         m.new_task(
             owner=owner,
             proyect=proyect,
-            _id=data['_id'],
+            _id=id,
             work=data['work'],
             status=data['status'],
-            tag = data['tags'].split(',')
+            tag = tgs
         )
 
-        socketio.emit('message', data, namespace = '/view')
+        data = {'_id': id, 'work': data['work'], 'status': data['status'],'tag': tgs,
+                'typeAction': data['typeAction'], 'm': data['m']}
+
+        socketio.emit('message', data, namespace='/view')
 
         return jsonify({'message': 'Yeah!'})
-    
+
     def put(self, owner, proyect):
         data = request.form
         if data['typeAction'] == 'changeStatus':
@@ -34,36 +48,102 @@ class Task(Resource):
                 status=data['status'],
                 move=data['move']
             )
-            
+
             data = dict(data)
             data['status'] = s
 
-            socketio.emit('message', data, namespace = '/view')
+            socketio.emit('message', data, namespace='/view')
 
             return jsonify({'message': 'Yeah!'})
         elif data['typeAction'] == 'taskEdit':
             m.edit_task(
-                 owner=owner,
+                owner=owner,
                 proyect=proyect,
                 _id=data['_id'],
-                work = data['work']
+                work=data['work']
             )
-            socketio.emit('message', data, namespace = '/view')
+            socketio.emit('message', data, namespace='/view')
+        elif data['action'] == 'delete':
+            self.delete(owner, proyect, data['_id'])
 
-    def delete(self, owner, proyect):
-        data = request.args.get('id')
-        
-        m.delete_task(
-            owner=owner,
-            proyect=proyect,
-            task_id=data
-        )
+    def delete(self, owner, proyect, idMovil=""):
+        data = request.args.get('id') if idMovil == "" else idMovil
 
-        data = request.args
+        print(data)
+        m.delete_task(owner=owner, proyect=proyect, task_id=data)
+
+        data = request.args if idMovil == "" else {'typeAction': 'deleteTask',
+                                                   'm': 'rm',
+                                                   'id': idMovil}
+        print(data)
 
         socketio.emit('message', data, namespace='/view')
 
         return jsonify({'message': 'Yeah!', '_id': data})
 
 
+class infoTask(Resource):
+    def get(self, owner, proyect, id):
+        x = m.find_task_info(owner=owner, proyect=proyect, _id=id)
+
+        return jsonify(x)
+
+    def put(self, owner, proyect, id):
+        data = request.form
+
+        if data['action'] == 'title':
+            m.update_task_title(
+                owner=owner,
+                proyect=proyect,
+                _id=id,
+                newTitle=data['newTitle']
+            )
+
+            data = {'_id': id, 'work': data['newTitle'], 'typeAction': 'title' }
+
+            socketio.emit('message', data, namespace='/view')
+
+        elif data['action'] == 'description':
+            print(data['newDescription'])
+            print('*********************')
+            m.update_task_description(
+                owner=owner,
+                proyect=proyect,
+                _id=id,
+                newDescription=data['newDescription']
+            )
+
+@app.route('/<owner>/<proyect>/upFile/<_id>', methods=['POST'])
+def uploadFile(owner, proyect, _id):
+    print('asdasd')
+    if request.method == 'POST':
+        print('Es post')
+    try:
+        id = str(uuid4())
+        f = file.save(request.files['file'],name=id)
+        print(f)
+
+        m.files_to_task(
+            owner = owner,
+            proyect = proyect,
+            _id = _id,
+            _idf = id,
+            name = request.form['namefile']
+        )
+
+        return jsonify({'name': request.form['namefile'], '_id': id})
+    except:
+        print('No dio')
+        return jsonify({'r' : 'Error!'})
+@app.route('/subir')
+def subir():
+    return '''
+    <form action="/upFile" enctype="multipart/form-data" method="POST">
+    <input type="file" name="file" id="file" required>
+    <input type="submit">
+    </form>
+    '''
+
+
+api.add_resource(infoTask, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(Task, '/api/<owner>/<proyect>/task')

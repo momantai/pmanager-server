@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 class mongod:
     def __init__(self, based):
         self.mong = based
-        self._status = ['backlog', 'progress', 'review', 'stop']
+        self._status = ['Backlog', 'Progress', 'Review', 'Stop']
 
     def find_task(self, **data):
         return self.mong.db.proyects.find_one({
@@ -19,6 +19,7 @@ class mongod:
             'task._id': 1,
             'task.tag': 1
         })
+
     def new_task(self, **data):
         self.mong.db.proyects.update_one({
             'owner': data['owner'],
@@ -29,7 +30,21 @@ class mongod:
                     '_id': data['_id'],
                     'work': data['work'],
                     'status': data['status'],
+                    #'description': '',
                     'tag': data['tag']
+                }
+            }
+        })
+    def files_to_task(self, **data):
+        self.mong.db.proyects.update_one({
+            'owner': data['owner'],
+            'proyect_id': data['proyect'],
+            'task._id': data['_id']
+        }, {
+            '$push': {
+                'task.$.resources': {
+                    '_id': data['_idf'],
+                    'name': data['name']
                 }
             }
         })
@@ -48,7 +63,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.status': status
+                    'task.$.status': status
                 }
             }, upsert=False)
         return status
@@ -79,3 +94,34 @@ class mongod:
                 }
             }
         )
+    
+    #CRUD task info
+    def find_task_info(self, **data):
+        return self.mong.db.proyects.find_one({
+            'task._id': data['_id']
+        }, {
+            'task.$[0]': 1,
+            '_id': 0
+        })
+    def update_task_title(self, **data):
+        self.mong.db.proyects.update(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect'],
+                'task._id': data['_id']
+            }, {
+                '$set': {
+                    'task.$.work': data['newTitle']
+                }
+            }, upsert=False)
+    def update_task_description(self, **data):
+        self.mong.db.proyects.update(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect'],
+                'task._id': data['_id']
+            }, {
+                '$set': {
+                    'task.$.description': data['newDescription']
+                }
+            }, upsert=False)
