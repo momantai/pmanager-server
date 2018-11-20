@@ -35,6 +35,7 @@ class mongod:
                 }
             }
         })
+
     def files_to_task(self, **data):
         self.mong.db.proyects.update_one({
             'owner': data['owner'],
@@ -42,7 +43,7 @@ class mongod:
             'task._id': data['_id']
         }, {
             '$push': {
-                'task.resources': {
+                'task.$.resources': {
                     '_id': data['_idf'],
                     'name': data['name']
                 }
@@ -56,17 +57,18 @@ class mongod:
         else:
             status = self._status[self._status.index(status)-1]
 
-        self.mong.db.proyects.update(
+        self.mong.db.proyects.update_one(
             {
                 'owner': 'momantai',
                 'proyect_id': data['proyect'],
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.status': status
+                    'task.$.status': status
                 }
             }, upsert=False)
         return status
+
     def edit_task(self, **data):
         self.mong.db.proyects.update(
             {
@@ -111,7 +113,7 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.work': data['newTitle']
+                    'task.$.work': data['newTitle']
                 }
             }, upsert=False)
     def update_task_description(self, **data):
@@ -122,6 +124,6 @@ class mongod:
                 'task._id': data['_id']
             }, {
                 '$set': {
-                    'task.description': data['newDescription']
+                    'task.$.description': data['newDescription']
                 }
             }, upsert=False)
