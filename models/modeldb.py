@@ -31,7 +31,9 @@ class mongod:
                     'work': data['work'],
                     'status': data['status'],
                     #'description': '',
-                    'tag': data['tag']
+                    'tag': data['tag'],
+                    'resources': [],
+                    'todo': []
                 }
             }
         })
@@ -127,3 +129,36 @@ class mongod:
                     'task.$.description': data['newDescription']
                 }
             }, upsert=False)
+    # Todo list
+    def create_todo(self, **data):
+        self.mong.db.proyects.update_one({
+            'owner': data['owner'],
+            'proyect_id': data['proyect'],
+            'task._id': data['_id']
+        }, {
+            '$push': {
+                'task.$.todo': {
+                    '_id': data['_idt'],
+                    'todo': data['todo'],
+                    'check': data['check']
+                }
+            }
+        })
+
+    def uptade_todo(self, **data):
+        print('Entro')
+        self.mong.db.proyects.update(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect'],
+                'task._id': data['_id'],
+                'task.todo._id': ['_idt']
+            }, {
+                'task.$.todo': {
+                    '$set': {
+                        'todo.$.todo': data['todo'],
+                        'todo.$.check': data['check']
+                    }
+                }
+            }, upsert=False)
+        print('Salio')

@@ -112,6 +112,28 @@ class infoTask(Resource):
                 _id=id,
                 newDescription=data['newDescription']
             )
+        elif data['action'] == 'todo':
+            if data['actodo'] == 'create':
+                _id = str(uuid4())
+                m.create_todo(
+                    owner=owner,
+                    proyect=proyect,
+                    _id = id,
+                    _idt= _id,
+                    todo = data['todo'],
+                    check = ''
+                )
+                print('Paso la prueba')
+                return jsonify({'_id': _id, 'todo': data['todo'], 'check': ''})
+            if data['actodo'] == 'update':
+                m.uptade_todo(
+                    owner = owner,
+                    proyect = proyect,
+                    _id = id,
+                    _idt= data['_id'],
+                    todo = data['todo'],
+                    check = data['check']
+                )
 
 @app.route('/<owner>/<proyect>/upFile/<_id>', methods=['POST'])
 def uploadFile(owner, proyect, _id):
