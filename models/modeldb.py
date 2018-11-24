@@ -145,20 +145,33 @@ class mongod:
             }
         })
 
-    def uptade_todo(self, **data):
+    def update_todo(self, **data):
         print('Entro')
+        self.mong.db.proyects.update_one(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect'],
+            }, 
+                {
+                    '$set': {
+                        'task.$[i].todo.$[j].todo': data['todo'],
+                        'task.$[i].todo.$[j].check': data['check']
+                    }
+                }, array_filters= [{"i._id": data['_id']}, {"j._id": data['idt']}])
+
+        print('Salio')
+    def delete_todo(self, **data):
         self.mong.db.proyects.update(
             {
                 'owner': data['owner'],
                 'proyect_id': data['proyect'],
-                'task._id': data['_id'],
-                'task.todo._id': ['_idt']
-            }, {
-                'task.$.todo': {
-                    '$set': {
-                        'todo.$.todo': data['todo'],
-                        'todo.$.check': data['check']
+                'task._id': data['_id']
+            },{
+                '$pull': {
+                    'task.$.todo': {
+                        '_id': data['idt']
+                        
                     }
                 }
-            }, upsert=False)
-        print('Salio')
+            }
+        )

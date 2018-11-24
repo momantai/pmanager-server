@@ -126,13 +126,22 @@ class infoTask(Resource):
                 print('Paso la prueba')
                 return jsonify({'_id': _id, 'todo': data['todo'], 'check': ''})
             if data['actodo'] == 'update':
-                m.uptade_todo(
-                    owner = owner,
-                    proyect = proyect,
-                    _id = id,
-                    _idt= data['_id'],
-                    todo = data['todo'],
-                    check = data['check']
+                print(data['check'])
+                m.update_todo(
+                    owner=owner,
+                    proyect=proyect,
+                    _id=id,
+                    idt=data['_id'],
+                    todo=data['todo'],
+                    check=data['check']
+                )
+                return jsonify({'ok':'Yeah!'})
+            if data['actodo'] == 'delete':
+                m.delete_todo(
+                    owner=owner,
+                    proyect=proyect,
+                    _id=id,
+                    idt=data['_id']
                 )
 
 @app.route('/<owner>/<proyect>/upFile/<_id>', methods=['POST'])
