@@ -127,6 +127,9 @@ class infoTask(Resource):
                 return jsonify({'_id': _id, 'todo': data['todo'], 'check': ''})
             if data['actodo'] == 'update':
                 print(data['check'])
+                print(data['todo'])
+                print(data['_id'])
+                print(id)
                 m.update_todo(
                     owner=owner,
                     proyect=proyect,
@@ -135,7 +138,7 @@ class infoTask(Resource):
                     todo=data['todo'],
                     check=data['check']
                 )
-                return jsonify({'ok':'Yeah!'})
+                return jsonify({'ok':'ok'})
             if data['actodo'] == 'delete':
                 m.delete_todo(
                     owner=owner,
@@ -175,6 +178,60 @@ def subir():
     </form>
     '''
 
+class projects(Resource):
+    def get(self, cola):
+        #return m.findprojects(collaborator=cola)
+        res = []
+        [res.append(i) for i in m.findprojects(collaborator=cola)]
+        return res
+        # return jsonify([{'title': p['title'], 'letters':'as','owner': p['owner'], 'proyect_id': p['proyect_id'],
+        #                 'xh': p['task'].count({'status': 'Backlog'}), 'h': p['task'].count({'status': 'Progress'}) + 
+        #                 p['task'].count({'status': 'Review'}), 'f': p['task'].count({'status': 'Stop'})}])
+    
+    def put(self, cola):
+        data = request.form
+        print(cola)
+        print(data['title'])
+        r = m.create_project(
+            owner = cola,
+            title = data['title'],
+            _id = data['_id']
+        )
+
+        print('¡Resando!')
+
+        return jsonify(r)
+
+class project(Resource):
+    def get(self, owner, proyect):
+        p = m.find_project(
+            owner=owner,
+            proyect=proyect
+        )
+        return jsonify(p)
+    def put(self, owner, proyect):
+        data = request.form
+        
+        if data['type'] == 'update':
+            m.update_project(
+                owner=owner,
+                proyect=proyect,
+                title = data['title'],
+                description = data['description']
+            )
+            return jsonify({'ok':'ok'})
+        elif data['type'] == 'addcoll':
+            print("Momantai")
+
+            c = m.add_collaborator(
+                _id = proyect,
+                owner = owner,
+                collaborator = data['collaborator']
+            )
+
+            return jsonify(c)
 
 api.add_resource(infoTask, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(Task, '/api/<owner>/<proyect>/task')
+api.add_resource(projects, '/api/projects/<cola>')
+api.add_resource(project, '/api/project/<owner>/<proyect>')

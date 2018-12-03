@@ -175,3 +175,112 @@ class mongod:
                 }
             }
         )
+
+    def findprojects(self, **data):
+        print("Hola")
+        return self.mong.db.proyects.find({
+            'collaborators': 'momantai'
+        }, {
+            '_id':0,
+            'title': 1,
+            'owner': 1,
+            'letters': 1,
+            'proyect_id': 1,
+            'task.status': 1
+        })
+
+    def find_project(self, **data):
+        return self.mong.db.proyects.find_one(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect']
+            },
+            {
+                '_id': 0,
+                'title': 1,
+                'description': 1,
+                'collaborators': 1,
+                'owner': 1,
+                'proyect_id': 1
+            }
+        )
+    def update_project(self, **data):
+        self.mong.db.proyects.update_one(
+            {
+                'owner': data['owner'],
+                'proyect_id': data['proyect']
+            },
+            {
+                '$set': {
+                    'title': data['title'],
+                    'description': data['description']
+                }
+            }
+        )
+    def add_collaborator(self, **data):
+        u = self.mong.db.users.find_one({
+            '$or': [{
+                'user': data['collaborator']
+            }, {
+                'mail': data['collaborator']
+            }]
+        },
+            {
+                'user': 1,
+                '_id': 0
+        })
+        
+        if u != None:
+            p = self.mong.db.proyects.find_one(
+                {
+                    'proyect_id': data['_id'],
+                    'owner': data['owner'],
+                    'collaborators': u['user']
+                }, {
+                    'proyect_id': 1,
+                    '_id': 0
+                }
+            )
+            if p == None:
+                self.mong.db.proyects.update_one(
+                    {
+                        'proyect_id': data['_id'],
+                        'owner': data['owner']
+                    },{
+                        '$push': {
+                            'collaborators': u['user']
+                        }
+                    }
+                )
+                return {'ok':'ok'}
+            else:
+                return {'ok':'UenP'}
+        else:
+            return {'ok':'UnoE'}
+    
+    def create_project(self, **data):
+        p = self.mong.db.proyects.find_one(
+            {
+                'proyect_id': data['_id'],
+                'owner': data['owner']
+            }, {
+                'proyect_id': 1,
+                '_id': 0
+            }
+        )
+
+        if p == None:
+            print('¡Insertando datos!')
+            self.mong.db.proyects.insert_one(
+                {
+                    'title': data['title'],
+                    'proyect_id': data['_id'],
+                    'owner': data['owner'],
+                    'description': '',
+                    'collaborators': [data['owner']],
+                    'task': []
+                }
+            )
+            return {'ok':'ok'}
+        print('¡Dato existente!')
+        return {'ok': 'exist'}
