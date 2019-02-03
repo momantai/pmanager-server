@@ -4,11 +4,160 @@ from flask_restful import Resource
 from uuid import uuid4
 from flask_uploads import UploadSet, configure_uploads, uploaded_file, ALL
 
+# Configuracion para subir archivos.
 
 file = UploadSet('files', ALL)
 configure_uploads(app, file)
 
-class Task(Resource):
+
+class projects(Resource):
+    """
+        Consulta proyetos propietarios y proyectos en los que un usuario colabora, asi como tambien utiliza la funcion de crear nuevos proyectos y eliminarlos. Interactua a traves del protocolo HTTP con los siguientes metodos:
+        url + '/api/projects/<cola>'
+        En donde:
+            <cola> : Es el nombre de usuario.
+        Metodos:
+            GET: Consulta los proyectos en los que estas trabajando, los valores recibidos en la consulta son:
+                {
+                    title,
+                    owner,
+                    letters,
+                    proyect_id
+                }
+            PUT: Crear un nuevo proyecto.
+                {
+                    title,
+                    _id
+                }
+    """
+    def get(self, cola):
+        res = []
+        [res.append(i) for i in m.findprojects(collaborator=cola)]
+        return res
+    
+    def put(self, cola):
+        data = request.form
+        print(cola)
+        print(data['title'])
+        r = m.create_project(
+            owner = cola,
+            title = data['title'],
+            _id = data['_id']
+        )
+
+        print('¡Resando!')
+
+        return jsonify(r)
+
+class project(Resource):
+    """
+        Consulta los detalles y colaboradores de un proyecto en el que trabajas. Para interactuar hazlo a traves del protocolo HTTP, utilizando los metodos que se te muestran mas adelante.
+        '/api/project/<owner>/<proyect>'
+        En donde:
+            <owner> : usuario propietario del proyecto consultado.
+            <proyecto> : identificador del proyecto a consultar.
+        Metodos a utilizar:
+            GET: Consulta los detalles del proyecto. Y recibe la siguiente informacion:
+                {
+                    title,
+                    description,
+                    collaborators,
+                    owner,
+                    proyect_id
+                }
+            PUT: Metodo para actualizar informacion de los detalles de un proyecto y agregar nuevos colaboradores a un proyecto (utilizando el mismo metodo gracias a un parametro que lo permite).
+                // Actualizar datalles de proyecto.
+                {
+                    type,
+                    title,
+                    description
+                }
+                // Agregar colaborador nuevo.
+                {
+                    type,
+                    collaborator
+                }
+    """
+    def get(self, owner, proyect):
+        p = m.find_project(
+            owner=owner,
+            proyect=proyect
+        )
+        return jsonify(p)
+    def put(self, owner, proyect):
+        data = request.form
+        
+        if data['type'] == 'update':
+            m.update_project(
+                owner=owner,
+                proyect=proyect,
+                title = data['title'],
+                description = data['description']
+            )
+            return jsonify({'ok':'ok'})
+        elif data['type'] == 'addcoll':
+            print("Momantai")
+
+            c = m.add_collaborator(
+                _id = proyect,
+                owner = owner,
+                collaborator = data['collaborator']
+            )
+
+            return jsonify(c)
+
+class thingsTodo(Resource):
+    """
+        Interactua con información muy superficial de las tareas encontradas en un proyecto, al permitir hacer una seleccion por tarea, moverlas de lugar, eliminarlas y abrir los detalles de dichas tareas, pero sin proveer la información de dichos detalles pues de eso se encarga una clase que veremos más adelante, para despues ser modificados.
+        La forma correcta de interactuar con esta clase a traves del protocolo HTTP es la siguiente:
+            url + '/api/<owner>/<proyect>/task'
+            En donde:
+                <owner> : Es el usuario propietario del proyecto al que se accede.
+                <proyect> : Es el identificador del proyecto al que intentas acceder.
+            
+            Utilizando los metodos del protocolo HTTP:
+                GET: Recibe informacion a traves de este metodo sin más parametros que la direccion proporcionada al hacer la consulta, los valores recibidos son:
+                    //Lista de tareas
+                    task [
+                        // Tarea
+                        {
+                            _id,
+                            work,
+                            status,
+                            tag
+                        }
+                    ]
+                POST: Después de enviar los valores a traves de este metodo recibiras una respuesta a traves de SocketIO como comprobacion de que tu informacion fue almacenada satisfactoriamente, los valores que deberas enviar son:
+                    // Crear tarea
+                    {
+                        work,
+                        status,
+                        tags
+                    }
+                PUT: Este metodo es utilizado para realizar varias instrucciones, asi que segun sea el caso los datos a enviar cambiaran un poco, tal como:
+                    // Cambiar tarea de estado
+                    {
+                        _id,
+                        status,
+                        move,
+                        typeAction
+                    }
+                    // Editar nombre de tarea
+                    {
+                        _id,
+                        work,
+                        typeAction
+                    }
+                    // Eliminar tarea (si no te funciona el metodo delete).
+                    {
+                        _id,
+                        action
+                    }
+                DELETE: Eliminar tareas, a traves de un unico valor enviado.
+                    {
+                        id
+                    }
+    """
     def get(self, owner, proyect):
         return jsonify(m.find_task(owner=owner, proyect=proyect))
 
@@ -28,10 +177,10 @@ class Task(Resource):
             _id=id,
             work=data['work'],
             status=data['status'],
-            tag = tgs
+            tag=tgs
         )
 
-        data = {'_id': id, 'work': data['work'], 'status': data['status'],'tag': tgs,
+        data = {'_id': id, 'work': data['work'], 'status': data['status'], 'tag': tgs,
                 'typeAction': data['typeAction'], 'm': data['m']}
 
         socketio.emit('message', data, namespace='/view')
@@ -81,8 +230,57 @@ class Task(Resource):
 
         return jsonify({'message': 'Yeah!', '_id': data})
 
-
-class infoTask(Resource):
+class Task(Resource):
+    """
+        Gestiona los detalles y la informacion que acompania a una tarea dentro de un taskboard.
+        url + '/api/<owner>/<proyect>/t/<id>'
+        En donde:
+            <owner> : usuario propietario del proyecto en el que se esta.
+            <proyect> : identificador del proyecto.
+            <id>: identeficador de la tarea a la que se intenta acceder.
+        Metodos utilizados:
+            GET: Consultar detalles de una tarea dentro de un proyecto, los siguientes valores son la respuesta de la consulta:
+                {
+                    _id,
+                    work,
+                    status,
+                    description,
+                    resources[],
+                    todo[]
+                }
+            PUT: Metodo con el cual podras realizar diferentes cosultas gracias a un parametro (action) que nos lo permite. En este caso envias los siguientes valores:
+                // Actualizar titulo de tarea
+                {
+                    newTitle,
+                    action
+                }
+                // Actualizar descripcion
+                {
+                    newDescription,
+                    action
+                }
+                # Entramos a la parte de ToDo dentro de una tarea
+                    // Nuevo todo
+                    {
+                        action,
+                        actiontodo,
+                        todo
+                    }
+                    //Editar todo
+                    {
+                        action,
+                        actiontodo,
+                        _id,
+                        todo,
+                        check
+                    }
+                    //Eliminar todo
+                    {
+                        action,
+                        actiontodo,
+                        _id
+                    }
+    """
     def get(self, owner, proyect, id):
         x = m.find_task_info(owner=owner, proyect=proyect, _id=id)
 
@@ -126,10 +324,6 @@ class infoTask(Resource):
                 print('Paso la prueba')
                 return jsonify({'_id': _id, 'todo': data['todo'], 'check': ''})
             if data['actodo'] == 'update':
-                print(data['check'])
-                print(data['todo'])
-                print(data['_id'])
-                print(id)
                 m.update_todo(
                     owner=owner,
                     proyect=proyect,
@@ -178,60 +372,7 @@ def subir():
     </form>
     '''
 
-class projects(Resource):
-    def get(self, cola):
-        #return m.findprojects(collaborator=cola)
-        res = []
-        [res.append(i) for i in m.findprojects(collaborator=cola)]
-        return res
-        # return jsonify([{'title': p['title'], 'letters':'as','owner': p['owner'], 'proyect_id': p['proyect_id'],
-        #                 'xh': p['task'].count({'status': 'Backlog'}), 'h': p['task'].count({'status': 'Progress'}) + 
-        #                 p['task'].count({'status': 'Review'}), 'f': p['task'].count({'status': 'Stop'})}])
-    
-    def put(self, cola):
-        data = request.form
-        print(cola)
-        print(data['title'])
-        r = m.create_project(
-            owner = cola,
-            title = data['title'],
-            _id = data['_id']
-        )
-
-        print('¡Resando!')
-
-        return jsonify(r)
-
-class project(Resource):
-    def get(self, owner, proyect):
-        p = m.find_project(
-            owner=owner,
-            proyect=proyect
-        )
-        return jsonify(p)
-    def put(self, owner, proyect):
-        data = request.form
-        
-        if data['type'] == 'update':
-            m.update_project(
-                owner=owner,
-                proyect=proyect,
-                title = data['title'],
-                description = data['description']
-            )
-            return jsonify({'ok':'ok'})
-        elif data['type'] == 'addcoll':
-            print("Momantai")
-
-            c = m.add_collaborator(
-                _id = proyect,
-                owner = owner,
-                collaborator = data['collaborator']
-            )
-
-            return jsonify(c)
-
-api.add_resource(infoTask, '/api/<owner>/<proyect>/t/<id>')
-api.add_resource(Task, '/api/<owner>/<proyect>/task')
+api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
+api.add_resource(thingsTodo, '/api/<owner>/<proyect>/task')
 api.add_resource(projects, '/api/projects/<cola>')
 api.add_resource(project, '/api/project/<owner>/<proyect>')
