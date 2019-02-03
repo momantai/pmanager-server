@@ -5,3 +5,6 @@ bin
 ./*/__pycache__
 pip-selfcheck.json
 static/files/
+share
+lib64
+pyvenv.cfg
