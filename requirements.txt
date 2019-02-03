@@ -1,3 +1,4 @@
+pip==19.0.1
 aniso8601==3.0.2
 blinker==1.4
 Click==7.0
