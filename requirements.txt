@@ -1,4 +1,3 @@
-pip==19.0.1
 aniso8601==3.0.2
 blinker==1.4
 Click==7.0
@@ -9,9 +8,9 @@ Flask-PyMongo==2.1.0
 Flask-RESTful==0.3.6
 Flask-SocketIO==3.0.2
 Flask-Uploads==0.2.1
-itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
+pkg-resources==0.0.0
 pymongo==3.7.2
 python-engineio==2.3.2
 python-socketio==2.0.0

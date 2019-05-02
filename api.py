@@ -32,20 +32,20 @@ class projects(Resource):
     """
     def get(self, cola):
         res = []
-        [res.append(i) for i in m.findprojects(collaborator=cola)]
+        [res.append(i) for i in m.find_projects(team=cola)]
         return res
     
     def put(self, cola):
         data = request.form
         print(cola)
-        print(data['title'])
+        #print(data['title'])
         r = m.create_project(
-            owner = cola,
+            leader = cola,
             title = data['title'],
             _id = data['_id']
         )
 
-        print('¡Resando!')
+        print('Resando')
 
         return jsonify(r)
 
@@ -80,7 +80,7 @@ class project(Resource):
     """
     def get(self, owner, proyect):
         p = m.find_project(
-            owner=owner,
+            leader=owner,
             proyect=proyect
         )
         return jsonify(p)
@@ -89,10 +89,10 @@ class project(Resource):
         
         if data['type'] == 'update':
             m.update_project(
-                owner=owner,
+                leader=owner,
                 proyect=proyect,
                 title = data['title'],
-                description = data['description']
+                details = data['description']
             )
             return jsonify({'ok':'ok'})
         elif data['type'] == 'addcoll':
@@ -100,8 +100,8 @@ class project(Resource):
 
             c = m.add_collaborator(
                 _id = proyect,
-                owner = owner,
-                collaborator = data['collaborator']
+                leader = owner,
+                team = data['collaborator']
             )
 
             return jsonify(c)
@@ -159,7 +159,7 @@ class thingsTodo(Resource):
                     }
     """
     def get(self, owner, proyect):
-        return jsonify(m.find_task(owner=owner, proyect=proyect))
+        return jsonify(m.find_task(leader=owner, proyect=proyect))
 
     def post(self, owner, proyect):
         data = request.form
@@ -172,16 +172,16 @@ class thingsTodo(Resource):
             tgs = ''
         print(tgs)
         m.new_task(
-            owner=owner,
+            leader=owner,
             proyect=proyect,
             _id=id,
-            work=data['work'],
+            name=data['name'],
             status=data['status'],
             tag=tgs
         )
 
-        data = {'_id': id, 'work': data['work'], 'status': data['status'], 'tag': tgs,
-                'typeAction': data['typeAction'], 'm': data['m']}
+        data = {'_id': id, 'name': data['name'], 'status': data['status'], 'tag': tgs,
+                'typeAction': data['typeAction']}
 
         socketio.emit('message', data, namespace='/view')
 
@@ -191,7 +191,7 @@ class thingsTodo(Resource):
         data = request.form
         if data['typeAction'] == 'changeStatus':
             s = m.change_task_status(
-                owner=owner,
+                leader=owner,
                 proyect=proyect,
                 _id=data['_id'],
                 status=data['status'],
@@ -206,20 +206,20 @@ class thingsTodo(Resource):
             return jsonify({'message': 'Yeah!'})
         elif data['typeAction'] == 'taskEdit':
             m.edit_task(
-                owner=owner,
+                leader=owner,
                 proyect=proyect,
                 _id=data['_id'],
                 work=data['work']
             )
             socketio.emit('message', data, namespace='/view')
         elif data['action'] == 'delete':
-            self.delete(owner, proyect, data['_id'])
+            self.delete(leader, proyect, data['_id'])
 
     def delete(self, owner, proyect, idMovil=""):
         data = request.args.get('id') if idMovil == "" else idMovil
 
         print(data)
-        m.delete_task(owner=owner, proyect=proyect, task_id=data)
+        m.delete_task(leader=owner, proyect=proyect, task_id=data)
 
         data = request.args if idMovil == "" else {'typeAction': 'deleteTask',
                                                    'm': 'rm',
@@ -282,7 +282,7 @@ class Task(Resource):
                     }
     """
     def get(self, owner, proyect, id):
-        x = m.find_task_info(owner=owner, proyect=proyect, _id=id)
+        x = m.find_task_info(leader=owner, proyect=proyect, _id=id)
 
         return jsonify(x)
 
@@ -291,30 +291,28 @@ class Task(Resource):
 
         if data['action'] == 'title':
             m.update_task_title(
-                owner=owner,
+                leader=owner,
                 proyect=proyect,
                 _id=id,
                 newTitle=data['newTitle']
             )
 
-            data = {'_id': id, 'work': data['newTitle'], 'typeAction': 'title' }
+            data = {'_id': id, 'name': data['newTitle'], 'sta': data['sta'],'typeAction': 'title' }
 
             socketio.emit('message', data, namespace='/view')
 
         elif data['action'] == 'description':
-            print(data['newDescription'])
+            #print(data['newDescription'])
             print('*********************')
-            m.update_task_description(
-                owner=owner,
-                proyect=proyect,
+            m.update_task_details(
                 _id=id,
-                newDescription=data['newDescription']
+                newdetails=data['newdetails']
             )
         elif data['action'] == 'todo':
             if data['actodo'] == 'create':
                 _id = str(uuid4())
                 m.create_todo(
-                    owner=owner,
+                    leader=owner,
                     proyect=proyect,
                     _id = id,
                     _idt= _id,
@@ -325,7 +323,7 @@ class Task(Resource):
                 return jsonify({'_id': _id, 'todo': data['todo'], 'check': ''})
             if data['actodo'] == 'update':
                 m.update_todo(
-                    owner=owner,
+                    leader=owner,
                     proyect=proyect,
                     _id=id,
                     idt=data['_id'],
@@ -335,7 +333,7 @@ class Task(Resource):
                 return jsonify({'ok':'ok'})
             if data['actodo'] == 'delete':
                 m.delete_todo(
-                    owner=owner,
+                    leader=owner,
                     proyect=proyect,
                     _id=id,
                     idt=data['_id']
@@ -352,7 +350,7 @@ def uploadFile(owner, proyect, _id):
         print(f)
 
         m.files_to_task(
-            owner = owner,
+            leader = owner,
             proyect = proyect,
             _id = _id,
             _idf = id,
@@ -372,7 +370,22 @@ def subir():
     </form>
     '''
 
+class test(Resource):
+    # s = m.change_task_status(
+    #             owner=owner,
+    #             proyect=proyect,
+    #             _id=data['_id'],
+    #             status=data['status'],
+    #             move=data['move']
+    #         )
+    def get(self, action):
+        if action == 'mstatus':
+            m.find_test()
+            return jsonify({'Hola': 1})
+
+
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(thingsTodo, '/api/<owner>/<proyect>/task')
 api.add_resource(projects, '/api/projects/<cola>')
 api.add_resource(project, '/api/project/<owner>/<proyect>')
+api.add_resource(test, '/test/<action>')
