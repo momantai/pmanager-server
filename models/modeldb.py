@@ -306,6 +306,30 @@ class mongod:
         else:
             return {'ok':'UnoE'}
     
+    def newlist(self, **data):
+        idlist = str(uuid4())
+
+        self.mong.db.proyects.update_one({
+            'project_id': data['_id'],
+            'leader': data['leader']
+        }, {
+            '$push': {
+                'board': {'_id': idlist, 'td': data['name']}
+            }
+        })
+        self.mong.db.thingstodo.insert_one(
+            {
+                '_thingstoid': idlist,
+                'things': []
+            }
+        )
+
+        return {'_id': idlist, 'td': data['name'], 'typeAction': 'newlist'}
+
+    def movetolist(self, **data):
+        pass
+
+
     def create_project(self, **data): # Faltan cosas
         p = self.mong.db.proyects.find_one(
             {

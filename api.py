@@ -383,9 +383,24 @@ class test(Resource):
             m.find_test()
             return jsonify({'Hola': 1})
 
+class listsProject(Resource):
+    def post(self, leader, project):
+        data = request.form
+
+        if 'movetolist' == data['action']:
+            print(data['futureIndex'])
+        elif 'newlist' == data['action']:
+            rdata = m.newlist(
+                _id = project,
+                leader = leader,
+                name = data['name']
+            )
+            socketio.emit('message', rdata, namespace='/view')
+
 
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(thingsTodo, '/api/<owner>/<proyect>/task')
 api.add_resource(projects, '/api/projects/<cola>')
 api.add_resource(project, '/api/project/<owner>/<proyect>')
 api.add_resource(test, '/test/<action>')
+api.add_resource(listsProject, '/api/<leader>/<project>/l')
