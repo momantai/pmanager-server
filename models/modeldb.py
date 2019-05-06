@@ -327,7 +327,35 @@ class mongod:
         return {'_id': idlist, 'td': data['name'], 'typeAction': 'newlist'}
 
     def movetolist(self, **data):
-        pass
+        info = self.mong.db.thingstodo.find_one({
+            'things._id': data['_id'] 
+        }, {
+            'things.$[0]': 1,
+            '_id': 0
+        })['things'][0]
+
+        self.mong.db.thingstodo.update({
+            'things._id': data['_id']
+        }, {
+            '$pull': {
+                'things': {
+                    '_id': data['_id']
+                }
+            }
+        })
+
+        self.mong.db.thingstodo.update({
+            '_thingstoid': data['final']
+        }, {
+            '$push': {
+                'things': {
+                    '$each': [info],
+                    '$position': int(data['futureIndex'])
+                }
+            }
+        })
+
+        print('Movido')
 
 
     def create_project(self, **data): # Faltan cosas

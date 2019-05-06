@@ -388,7 +388,11 @@ class listsProject(Resource):
         data = request.form
 
         if 'movetolist' == data['action']:
-            print(data['futureIndex'])
+            m.movetolist(
+                _id = data['element'],
+                final = data['final'],
+                futureIndex = data['futureIndex']
+            )
         elif 'newlist' == data['action']:
             rdata = m.newlist(
                 _id = project,
