@@ -42,7 +42,7 @@ class projects(Resource):
         r = m.create_project(
             leader = cola,
             title = data['title'],
-            _id = data['_id']
+            _id = str(uuid4()) # data['_id']
         )
 
         print('Resando')
