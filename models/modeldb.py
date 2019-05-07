@@ -1,6 +1,9 @@
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from uuid import uuid4
+import random
+
+colors = ['#1bbc9b', '#2dcc70', '#3598db', '#9a59b5', '#34495e', '#16a086', '#27ae61', '#297fb8', '#8d44ad', '#2d3e50', '#f1c40f', '#e67f22', '#e84c3d', '#95a5a5', '#f39c11', '#d25400', '#c1392b', '#bec3c7', '#7e8c8d']
 
 class mongod:
     def __init__(self, based):
@@ -308,13 +311,14 @@ class mongod:
     
     def newlist(self, **data):
         idlist = str(uuid4())
+        color = random.choice(colors)
 
         self.mong.db.proyects.update_one({
             'project_id': data['_id'],
             'leader': data['leader']
         }, {
             '$push': {
-                'board': {'_id': idlist, 'td': data['name']}
+                'board': {'_id': idlist, 'td': data['name'], 'color': color}
             }
         })
         self.mong.db.thingstodo.insert_one(
@@ -324,7 +328,7 @@ class mongod:
             }
         )
 
-        return {'_id': idlist, 'td': data['name'], 'typeAction': 'newlist'}
+        return {'_id': idlist, 'td': data['name'], 'color': color,'typeAction': 'newlist'}
 
     def movetolist(self, **data):
         info = self.mong.db.thingstodo.find_one({
@@ -381,7 +385,7 @@ class mongod:
                     'leader': data['leader'],
                     'details': '',
                     'team': [data['leader']],
-                    'board': [{'_id': idlist, 'td': '¿Qué hacer?'}]
+                    'board': [{'_id': idlist, 'td': '¿Qué hacer?', 'color': random.choice(colors)}]
                 }
             )
             idtask = str(uuid4())
@@ -399,6 +403,6 @@ class mongod:
             })
 
             print('Hubo errorrrrrrrrrr')
-            return {'ok':'ok'}
+            return {'title': data['title'], 'project_id': data['_id'], 'leader': data['leader']}
         print('Dato existente')
         return {'ok': 'exist'}

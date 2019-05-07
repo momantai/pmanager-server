@@ -3,6 +3,7 @@ from flask import jsonify, request, render_template
 from flask_restful import Resource
 from uuid import uuid4
 from flask_uploads import UploadSet, configure_uploads, uploaded_file, ALL
+import random
 
 # Configuracion para subir archivos.
 
@@ -42,7 +43,7 @@ class projects(Resource):
         r = m.create_project(
             leader = cola,
             title = data['title'],
-            _id = data['_id']
+            _id = str(uuid4()) # data['_id']
         )
 
         print('Resando')
