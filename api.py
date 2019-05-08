@@ -182,7 +182,7 @@ class thingsTodo(Resource):
         )
 
         data = {'_id': id, 'name': data['name'], 'status': data['status'], 'tag': tgs,
-                'typeAction': data['typeAction']}
+                'typeAction': data['typeAction'], 'isproject': proyect}
 
         socketio.emit('message', data, namespace='/view')
 
@@ -393,7 +393,11 @@ class listsProject(Resource):
                 _id = data['element'],
                 final = data['final'],
                 futureIndex = data['futureIndex']
-            )
+            )  
+
+            rdata = {'element': data['element'], 'init': data['init'], 'final': data['final'], 'index': data['index'], 'futureIndex': data['futureIndex'], 'typeAction': data['action'], 'isproject': project}
+
+            socketio.emit('message', rdata, namespace='/view')
         elif 'newlist' == data['action']:
             rdata = m.newlist(
                 _id = project,
