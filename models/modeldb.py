@@ -2,6 +2,7 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from uuid import uuid4
 import random
+import json
 
 colors = ['#1bbc9b', '#2dcc70', '#3598db', '#9a59b5', '#34495e', '#16a086', '#27ae61', '#297fb8', '#8d44ad', '#2d3e50', '#f1c40f', '#e67f22', '#e84c3d', '#95a5a5', '#f39c11', '#d25400', '#c1392b', '#bec3c7', '#7e8c8d']
 
@@ -231,14 +232,34 @@ class mongod:
 
     def find_projects(self, **data): # Faltan cosas
         print("Hola")
-        return self.mong.db.proyects.find({
+        p = self.mong.db.proyects.find({
             'team': 'momantai'
         }, {
             '_id':0,
             'title': 1,
             'leader': 1,
             'project_id': 1,
+            'team': 1,
         })
+        q = p
+        b = []
+        for i in p:
+            el = self.mong.db.users.find({
+                'user': {
+                    '$in': i['team']
+                }
+            }, {
+                '_id': 0,
+                'user': 1,
+                'first_name': 1,
+                'last_name': 1,
+                'imgprofile': 1
+            })
+            i['team'] = [item for item in el]
+            b.append(i)
+        if b == []:
+            return [i for i in q]
+        return b
 
     def find_project(self, **data): # Bien
         return self.mong.db.proyects.find_one(

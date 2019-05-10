@@ -33,7 +33,8 @@ class projects(Resource):
     """
     def get(self, cola):
         res = []
-        [res.append(i) for i in m.find_projects(team=cola)]
+        # [res.append(i) for i in m.find_projects(team=cola)]
+        res = m.find_projects(team=cola)
         return res
     
     def put(self, cola):
