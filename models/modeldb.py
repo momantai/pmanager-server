@@ -240,6 +240,7 @@ class mongod:
             'leader': 1,
             'project_id': 1,
             'team': 1,
+	    'details': 1,
         })
         q = p
         b = []
@@ -427,3 +428,26 @@ class mongod:
             return {'title': data['title'], 'project_id': data['_id'], 'leader': data['leader']}
         print('Dato existente')
         return {'ok': 'exist'}
+    
+
+    # User
+    def signup(self, data):
+        slef.mong.db.users(
+            {
+                '$and': [
+                    {'$or': [
+                        {'user': data['user']},
+                        {'email': data['user'] }
+                    ]},
+                    {
+                        'password': data['password']
+                    }
+                ]
+            },
+            {
+                '_id': 0,
+                'user': 1,
+            }
+        )
+    def signin(self):
+        pass

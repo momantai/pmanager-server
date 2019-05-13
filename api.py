@@ -407,6 +407,14 @@ class listsProject(Resource):
             )
             socketio.emit('message', rdata, namespace='/view')
 
+class usersignup(Resource):
+    def post(self):
+        data = request.form
+        
+class usersignin(Resource):
+    def post(self);
+        data = request.form
+
 
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(thingsTodo, '/api/<owner>/<proyect>/task')
@@ -414,3 +422,4 @@ api.add_resource(projects, '/api/projects/<cola>')
 api.add_resource(project, '/api/project/<owner>/<proyect>')
 api.add_resource(test, '/test/<action>')
 api.add_resource(listsProject, '/api/<leader>/<project>/l')
+api.add_resource(usersignup, '/api/user/signup')
