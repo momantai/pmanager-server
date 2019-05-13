@@ -412,7 +412,7 @@ class usersignup(Resource):
         data = request.form
         
 class usersignin(Resource):
-    def post(self);
+    def post(self):
         data = request.form
 
 
