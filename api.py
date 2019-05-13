@@ -410,10 +410,22 @@ class listsProject(Resource):
 class usersignup(Resource):
     def post(self):
         data = request.form
+        return m.signup(
+            user = data['user'],
+            email = data['email'],
+            first_name = data['first_name'],
+            last_name = data['last_name'],
+            password = data['password']
+        )
         
 class usersignin(Resource):
     def post(self):
         data = request.form
+        print(data)
+        return m.signin(
+            user = data['user'],
+            password = data['password']
+        )
 
 
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
@@ -423,3 +435,4 @@ api.add_resource(project, '/api/project/<owner>/<proyect>')
 api.add_resource(test, '/test/<action>')
 api.add_resource(listsProject, '/api/<leader>/<project>/l')
 api.add_resource(usersignup, '/api/user/signup')
+api.add_resource(usersignin, '/api/user/signin')

@@ -59,7 +59,7 @@ def datas(*msg):
     print(msg)
 
 #port = int(os.getenv('PORT', 5000))
-port = os.environ.get("PORT") or os.environ.get("VCAP_APP_PORT") or 5000
+port = os.environ.get("PORT") or os.environ.get("VCAP_APP_PORT") or 5009
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=int(port))
 

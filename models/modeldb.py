@@ -431,8 +431,32 @@ class mongod:
     
 
     # User
-    def signup(self, data):
-        slef.mong.db.users(
+    def signup(self, **data):
+        dta = self.mong.db.users.find_one(
+            {
+                '$or': [
+                    {'user': data['user']},
+                    {'email': data['email'] }
+                ]
+            }
+        )
+
+        if None == dta:
+            self.mong.db.users.insert_one({
+                'user': data['user'],
+                'email': data['email'],
+                'first_name': data['first_name'],
+                'last_name': data['last_name'],
+                'password': data['password'],
+                'imgprofile': [{'small': 'image.jpg', 'normal': 'image.jpg'}],
+            })
+
+            return json.dumps({'status': True})
+            
+        return json.dumps({'status': False})
+
+    def signin(self, **data):
+        dta = self.mong.db.users.find_one(
             {
                 '$and': [
                     {'$or': [
@@ -444,10 +468,17 @@ class mongod:
                     }
                 ]
             },
-            {
-                '_id': 0,
-                'user': 1,
-            }
+                    {
+                        '_id': 0,
+                        'first_name': 1,
+                        'last_name': 1,
+                        'user': 1,
+                        'email': 1,
+                    }
         )
-    def signin(self):
-        pass
+
+        if dta == None:
+            return json.dumps({'status': False})
+        
+        dta.update({'status': True})
+        return json.dumps(dta)
