@@ -233,14 +233,14 @@ class mongod:
     def find_projects(self, **data): # Faltan cosas
         print("Hola")
         p = self.mong.db.proyects.find({
-            'team': 'momantai'
+            'team': data['team']
         }, {
             '_id':0,
             'title': 1,
             'leader': 1,
             'project_id': 1,
             'team': 1,
-	    'details': 1,
+	        'details': 1,
         })
         q = p
         b = []
@@ -444,6 +444,7 @@ class mongod:
         if None == dta:
             self.mong.db.users.insert_one({
                 'user': data['user'],
+                '_userid': str(uuid4()),
                 'email': data['email'],
                 'first_name': data['first_name'],
                 'last_name': data['last_name'],
@@ -472,13 +473,40 @@ class mongod:
                         '_id': 0,
                         'first_name': 1,
                         'last_name': 1,
+                        '_userid': 1,
                         'user': 1,
-                        'email': 1,
+                        'email': 1
                     }
         )
 
         if dta == None:
             return json.dumps({'status': False})
         
-        dta.update({'status': True})
+        keysession = str(uuid4())
+        print(dta)
+        self.setidentify(
+            key = keysession,
+            user = dta['user'],
+            userid = dta['_userid']
+        )
+
+        dta.update({'status': True, 'key': keysession})
+        return json.dumps(dta)
+
+    def setidentify(self, **data):
+        self.mong.db.sessions.insert_one({
+            '_sessionid': data['key'],
+            '_user': data['user'],
+            '_userid': data['userid'],
+        })
+
+    def identify(self, **data):
+        dta = self.mong.db.sessions.find_one(
+            {
+                '_sessionid': data['key']
+            }, {
+                '_id': 0
+            })
+        
+        print(dta)
         return json.dumps(dta)

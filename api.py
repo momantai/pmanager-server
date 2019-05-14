@@ -33,6 +33,7 @@ class projects(Resource):
     """
     def get(self, cola):
         res = []
+        
         # [res.append(i) for i in m.find_projects(team=cola)]
         res = m.find_projects(team=cola)
         return res
@@ -417,7 +418,7 @@ class usersignup(Resource):
             last_name = data['last_name'],
             password = data['password']
         )
-        
+
 class usersignin(Resource):
     def post(self):
         data = request.form
@@ -426,6 +427,15 @@ class usersignin(Resource):
             user = data['user'],
             password = data['password']
         )
+
+@app.route('/api/identify')
+def identeficar():
+    key = request.args.get('key')
+    return identify(m, key)
+
+# Indentify
+def identify(db, key):
+    return db.identify(key = key)
 
 
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
