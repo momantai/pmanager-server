@@ -389,8 +389,10 @@ class test(Resource):
 class listsProject(Resource):
     def post(self, leader, project):
         data = request.form
-
+        print(data)
         if 'movetolist' == data['action']:
+            print('adkasdqwdiqw diqwdioqwdo')
+            print(data)
             m.movetolist(
                 _id = data['element'],
                 final = data['final'],
