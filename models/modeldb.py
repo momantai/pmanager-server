@@ -130,20 +130,20 @@ class mongod:
             }
         )
 
-    def delete_task(self, **data):
-        self.mong.db.proyects.update(
-            {
-                'leader': data['leader'],
-                'project_id': data['proyect']
-            },
-            {
-                '$pull': {
-                    'task': {
-                        '_id': data['task_id']
-                    }
-                }
-            }
-        )
+    # def delete_task(self, **data):
+    #     self.mong.db.proyects.update(
+    #         {
+    #             'leader': data['leader'],
+    #             'project_id': data['proyect']
+    #         },
+    #         {
+    #             '$pull': {
+    #                 'task': {
+    #                     '_id': data['task_id']
+    #                 }
+    #             }
+    #         }
+    #     )
     
     #CRUD task info
     def find_task_info(self, **data): # Faltan cosas
@@ -176,6 +176,7 @@ class mongod:
                     'things.$.name': data['newTitle']
                 }
             }, upsert=False)
+
     def update_task_details(self, **data): # Bien
         self.mong.db.thingstodo.update(
             {
@@ -185,6 +186,18 @@ class mongod:
                     'things.$.details': data['newdetails']
                 }
             }, upsert=False)
+
+    def delete_task(self, **data):
+        self.mong.db.thingstodo.update({
+                '_thingstoid': data['_listid']
+            },
+            {
+                '$pull': {
+                    'things': {
+                        '_id': data['_id']
+                    }
+                }
+            })
     # Todo list
     def create_todo(self, **data):
         self.mong.db.resources.update_one({
@@ -263,7 +276,7 @@ class mongod:
         return b
 
     def find_project(self, **data): # Bien
-        return self.mong.db.proyects.find_one(
+        project = self.mong.db.proyects.find_one(
             {
                 'leader': data['leader'],
                 'project_id': data['proyect']
@@ -277,6 +290,22 @@ class mongod:
                 'project_id': 1
             }
         )
+
+        team = self.mong.db.users.find({
+                'user': {
+                    '$in': project['team']
+                }
+            }, {
+                '_id': 0,
+                'user': 1,
+                'first_name': 1,
+                'last_name': 1,
+                'imgprofile': 1
+            })
+        project.update({'team': [i for i in team]})
+
+        return project
+
     def update_project(self, **data): # Bien
         self.mong.db.proyects.update_one(
             {
@@ -293,9 +322,9 @@ class mongod:
     def add_collaborator(self, **data):
         u = self.mong.db.users.find_one({
             '$or': [{
-                'user': data['collaborator']
+                'user': data['team']
             }, {
-                'mail': data['collaborator']
+                'mail': data['team']
             }]
         },
             {
@@ -330,6 +359,32 @@ class mongod:
                 return {'ok':'UenP'}
         else:
             return {'ok':'UnoE'}
+
+    # Hacer una busqueda por nombre de usuario.
+    def search_user(self, **data):
+        userdata = self.mong.db.users.find(
+            {
+                '$or': [
+                    {'user'  : {
+                        '$regex': data['username']
+                    }},
+                    {'email' : {
+                        "$regex": data['username']
+                    }}
+                ]
+            },
+            {
+                '_id' : 0,
+                'user': 1,
+                'first_name': 1,
+                'last_name': 1,
+                'imgprofile': 1,
+            }
+        ).limit(6)
+
+        userdata = [i for i in userdata]
+        
+        return userdata
     
     def newlist(self, **data):
         idlist = str(uuid4())
@@ -351,6 +406,17 @@ class mongod:
         )
 
         return {'_id': idlist, 'td': data['name'], 'color': color,'typeAction': 'newlist'}
+
+    def changenamelist(self, **data):
+        self.mong.db.proyects.update({
+            'project_id': data['_id'],
+            'leader': data['leader'],
+            'board._id': data['_idlist']
+        }, {
+            '$set': {
+                'board.$.td': data['namelist']
+            }
+        }, upsert=False)
 
     def movetolist(self, **data):
         info = self.mong.db.thingstodo.find_one({
@@ -383,6 +449,11 @@ class mongod:
 
         print('Movido')
 
+    def delete_project(self, **data):
+        self.mong.db.proyects.remove({
+            'project_id': data['_id'],
+            'leader': data['leader']
+        })
 
     def create_project(self, **data): # Faltan cosas
         p = self.mong.db.proyects.find_one(
@@ -461,7 +532,7 @@ class mongod:
             {
                 '$and': [
                     {'$or': [
-                        {'user': data['user']},
+                        {},
                         {'email': data['user'] }
                     ]},
                     {

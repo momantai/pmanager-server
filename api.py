@@ -89,6 +89,7 @@ class project(Resource):
         return jsonify(p)
     def put(self, owner, proyect):
         data = request.form
+        print(data['type'])
         
         if data['type'] == 'update':
             m.update_project(
@@ -108,6 +109,16 @@ class project(Resource):
             )
 
             return jsonify(c)
+        elif data['type'] == 'deleteProject':
+            print(data['sure'])
+            if data['sure'] == 'true':
+                m.delete_project(
+                    _id = proyect,
+                    leader = owner
+                )
+                return jsonify({'status': True})
+            return jsonify({'status': False})
+        return jsonify({'status': 'error'})
 
 class thingsTodo(Resource):
     """
@@ -215,8 +226,14 @@ class thingsTodo(Resource):
                 work=data['work']
             )
             socketio.emit('message', data, namespace='/view')
-        elif data['action'] == 'delete':
-            self.delete(leader, proyect, data['_id'])
+        elif data['typeAction'] == 'deleteTask':
+            m.delete_task(
+                _listid = data['list'],
+                _id = data['_id']
+            )
+            data = {'typeAction': 'deleteTask', 'list': data['list'], '_id': data['_id']}
+            socketio.emit('message', data, namespace='/view')
+            return jsonify(data)
 
     def delete(self, owner, proyect, idMovil=""):
         data = request.args.get('id') if idMovil == "" else idMovil
@@ -409,6 +426,14 @@ class listsProject(Resource):
                 name = data['name']
             )
             socketio.emit('message', rdata, namespace='/view')
+        elif 'updatenamelist' == data['action']:
+            m.changenamelist(
+                _id = project,
+                leader = leader,
+                _idlist = data['_id'],
+                namelist = data['namelist']
+            )
+            return jsonify({'status': True})
 
 class usersignup(Resource):
     def post(self):
@@ -439,6 +464,11 @@ def identeficar():
 def identify(db, key):
     return db.identify(key = key)
 
+@app.route('/api/search-user/<username>')
+def search_user(username):
+    return jsonify(m.search_user(
+        username = username
+    ))
 
 api.add_resource(Task, '/api/<owner>/<proyect>/t/<id>')
 api.add_resource(thingsTodo, '/api/<owner>/<proyect>/task')
