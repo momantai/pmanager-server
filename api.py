@@ -91,11 +91,17 @@ class project(Resource):
         data = request.form
         print(data['type'])
         
-        if data['type'] == 'update':
-            m.update_project(
+        if data['type'] == 'updateTitle':
+            m.update_project_title(
                 leader=owner,
                 proyect=proyect,
-                title = data['title'],
+                title = data['title']
+            )
+            return jsonify({'ok':'ok'})
+        elif data['type'] == 'updateDetails':
+            m.update_project_details(
+                leader=owner,
+                proyect=proyect,
                 details = data['description']
             )
             return jsonify({'ok':'ok'})

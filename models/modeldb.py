@@ -319,6 +319,33 @@ class mongod:
                 }
             }
         )
+
+    def update_project_title(self, **data):
+        self.mong.db.proyects.update_one(
+            {
+                'leader': data['leader'],
+                'project_id': data['proyect']
+            },
+            {
+                '$set': {
+                    'title': data['title']
+                }
+            }
+        )
+    
+    def update_project_details(self, **data):
+        self.mong.db.proyects.update_one(
+            {
+                'leader': data['leader'],
+                'project_id': data['proyect']
+            },
+            {
+                '$set': {
+                    'details': data['details']
+                }
+            }
+        )
+
     def add_collaborator(self, **data):
         u = self.mong.db.users.find_one({
             '$or': [{
