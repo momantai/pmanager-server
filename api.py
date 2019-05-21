@@ -323,8 +323,8 @@ class Task(Resource):
                 newTitle=data['newTitle']
             )
 
-            data = {'_id': id, 'name': data['newTitle'], 'sta': data['sta'],'typeAction': 'title' }
-
+            data = {'_id': id, 'name': data['newTitle'], 'sta': data['sta'],'typeAction': 'title', 'isproject': proyect }
+            print(data)
             socketio.emit('message', data, namespace='/view')
 
         elif data['action'] == 'description':
