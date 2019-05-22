@@ -43,6 +43,18 @@ def email():
     mail.send(msg)
     return "Mensaje enviado."
 
+@app.route('/send-notification')
+def notificationme():
+    data = {'notification': 'Haz sido invitado a un nuevo proyecto.'}
+    socketio.emit('notify', data, namespace='/socket/momantai')
+    return ''
+
+@app.route('/send-interaction')
+def interaction():
+    data = {'status': 'interaction'}
+    socketio.emit('interaction', data, namespace='/socket/momantai')
+    return ''
+
 from views import *
 from api import *
 

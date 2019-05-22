@@ -82,13 +82,11 @@ class mongod:
         })
 
     def files_to_task(self, **data):
-        self.mong.db.proyects.update_one({
-            'leader': data['leader'],
-            'project_id': data['proyect'],
-            'task._id': data['_id']
+        self.mong.db.resources.update_one({
+            '_resourceid': data['_id']
         }, {
             '$push': {
-                'task.$.resources': {
+                'resources': {
                     '_id': data['_idf'],
                     'name': data['name']
                 }
@@ -158,10 +156,12 @@ class mongod:
             '_resourceid': data['_id']
         }, {
             '_id': 0,
-            '_resourceid': 0
+            '_resourceid': 0,
         })
 
         i = str(info)
+
+        print(resource)
 
         
 
