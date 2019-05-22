@@ -46,13 +46,13 @@ def email():
 @app.route('/send-notification')
 def notificationme():
     data = {'notification': 'Haz sido invitado a un nuevo proyecto.'}
-    socketio.emit('notify', data, namespace='/socket/momantai')
+    socketio.emit('notify', data, namespace='/socket/arien')
     return ''
 
 @app.route('/send-interaction')
 def interaction():
     data = {'status': 'interaction'}
-    socketio.emit('interaction', data, namespace='/socket/momantai')
+    socketio.emit('interaction', data, namespace='/socket/arien')
     return ''
 
 from views import *

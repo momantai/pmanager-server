@@ -106,13 +106,16 @@ class project(Resource):
             )
             return jsonify({'ok':'ok'})
         elif data['type'] == 'addcoll':
-            print("Momantai")
 
             c = m.add_collaborator(
                 _id = proyect,
                 leader = owner,
                 team = data['collaborator']
             )
+            colabora = data['collaborator']
+            if c['ok'] == 'ok':
+                data = {'notification': 'Haz sido invitado a un nuevo proyecto.'}
+                socketio.emit('notify', data, namespace='/socket/{}'.format(colabora))
 
             return jsonify(c)
         elif data['type'] == 'deleteProject':
