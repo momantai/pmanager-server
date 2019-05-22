@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from uuid import uuid4
 import random
 import json
+from flask import jsonify
 
 colors = ['#1bbc9b', '#2dcc70', '#3598db', '#9a59b5', '#34495e', '#16a086', '#27ae61', '#297fb8', '#8d44ad', '#2d3e50', '#f1c40f', '#e67f22', '#e84c3d', '#95a5a5', '#f39c11', '#d25400', '#c1392b', '#bec3c7', '#7e8c8d']
 
@@ -589,7 +590,7 @@ class mongod:
         )
 
         dta.update({'status': True, 'key': keysession})
-        return json.dumps(dta)
+        return jsonify(dta)
 
     def setidentify(self, **data):
         self.mong.db.sessions.insert_one({

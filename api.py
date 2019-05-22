@@ -431,6 +431,7 @@ class listsProject(Resource):
                 leader = leader,
                 name = data['name']
             )
+            rdata.update({'isproject': project})
             socketio.emit('message', rdata, namespace='/view')
         elif 'updatenamelist' == data['action']:
             m.changenamelist(
