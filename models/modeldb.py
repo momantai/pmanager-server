@@ -162,11 +162,17 @@ class mongod:
 
         i = str(info)
 
+        comments = self.mong.db.comments.find({
+            '_idtask': data['_id']
+        },{
+            '_id': 0
+        })
+
         print(resource)
 
         
 
-        return {'things': info['things'][0], 'resource': resource}
+        return {'things': info['things'][0], 'resource': resource, 'comments': [i for i in comments]}
 
     def update_task_title(self, **data): # Bien
         self.mong.db.thingstodo.update(
@@ -609,3 +615,23 @@ class mongod:
         
         print(dta)
         return json.dumps(dta)
+
+    def comment(self, **data):
+        _idcomment = str(uuid4())
+        self.mong.db.comments.insert_one(
+            {
+                '_idcomment': _idcomment,
+                'commentary': data['commentary'],
+                'usercomment': data['user'],
+                '_idtask': data['_idtask']
+            }
+        )
+
+        return {'_idcomment': _idcomment}
+    
+    def getcomments(self, **data):
+        return self.mong.db.comments.find({
+            '_idtask': data['_idtask']
+        },{
+            '_id': 0
+        })

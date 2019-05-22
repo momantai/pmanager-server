@@ -462,6 +462,26 @@ class usersignin(Resource):
             password = data['password']
         )
 
+class comments(Resource):
+    def get(self, leader, project, id):
+        #data = request.form
+
+        commentsdata = m.getcomments(
+            _idtask = id
+        )
+        print(commentsdata)
+        return [i for i in commentsdata]
+    def post(self, leader, project, id):
+        data = request.form
+        print(data)
+        d = m.comment(
+            user = data['user'],
+            commentary = data['commentary'],
+            _idtask = id
+        )
+
+        return jsonify({'user': data['user'], 'commentary': data['commentary'], '_idcomment': d['_idcomment']})
+
 @app.route('/api/identify')
 def identeficar():
     key = request.args.get('key')
@@ -485,3 +505,4 @@ api.add_resource(test, '/test/<action>')
 api.add_resource(listsProject, '/api/<leader>/<project>/l')
 api.add_resource(usersignup, '/api/user/signup')
 api.add_resource(usersignin, '/api/user/signin')
+api.add_resource(comments, '/api/<leader>/<project>/t/<id>/c')
