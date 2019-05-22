@@ -480,7 +480,7 @@ class comments(Resource):
             _idtask = id
         )
 
-        return jsonify({'user': data['user'], 'commentary': data['commentary'], '_idcomment': d['_idcomment']})
+        return jsonify({'usercomment': data['user'], 'commentary': data['commentary'], '_idcomment': d['_idcomment']})
 
 @app.route('/api/identify')
 def identeficar():
